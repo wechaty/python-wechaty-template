@@ -1,2 +1,6 @@
 # python-wechaty-template
-getting started project template for python-wechaty
+
+Python Wechaty Project Template which contains the best practise.
+
+## Getting Started
+
