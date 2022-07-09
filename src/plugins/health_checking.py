@@ -10,11 +10,13 @@ from wechaty.plugin import WechatyPlugin
 from wechaty_plugin_contrib.message_controller import message_controller
 
 
-class DingDongPlugin(WechatyPlugin):
-    """ding dong plugin"""
+class HealthCheckingPlugin(WechatyPlugin):
+    """health checking plugin"""
     def __init__(self, options: Optional[WechatyPluginOptions] = None):
         super().__init__(options)
         self.event = Event()
+        self.is_init = False
+
     async def init_plugin(self, wechaty: Wechaty) -> None:
         """init the plugin on the dong event"""
         wechaty.on('dong', self.on_dong)
@@ -30,15 +32,6 @@ class DingDongPlugin(WechatyPlugin):
         """listen message event"""
         talker = msg.talker()
         text = msg.text()
-        if msg.room():
-            topic = await msg.room().topic()
-            if topic.startswith('嘉怡') and topic.endswith('号楼组群'):
-                return
-            if topic == '嘉怡志愿者群':
-                return
-
-            self.logger.info(msg)
-        self.logger.info(msg)
 
         if text == 'ding':
             message_controller.disable_all_plugins(msg)
@@ -48,6 +41,7 @@ class DingDongPlugin(WechatyPlugin):
                 await talker.say('dong')
 
     async def blueprint(self, app: Quart) -> None:
+        """add blue print to start web service"""
         @app.route('/ding')
         async def listence_ding():
             if not self.is_init:

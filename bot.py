@@ -1,13 +1,9 @@
+from __future__ import annotations
 import asyncio
-import sys
 from wechaty import Wechaty, WechatyOptions
 
 from dotenv import load_dotenv
-from plugins.ding_dong import DingDongPlugin
-
-
-async def final_failure_handler(*args, **kwargs):
-    sys.exit()
+from src.plugins.health_checking import HealthCheckingPlugin
 
 
 if __name__ == "__main__":
@@ -19,6 +15,6 @@ if __name__ == "__main__":
     )
     bot = Wechaty(options)
     bot.use([
-        DingDongPlugin(),
+        HealthCheckingPlugin(),
     ])
     asyncio.run(bot.start())
