@@ -6,20 +6,17 @@ from quart import Quart, jsonify
 
 from wechaty import Message, Wechaty, WechatyPluginOptions
 from wechaty.plugin import WechatyPlugin
-from wechaty_puppet import get_logger
 
+from wechaty_plugin_contrib.message_controller import message_controller
 
 
 class DingDongPlugin(WechatyPlugin):
-    """DingDong Plugin"""
+    """ding dong plugin"""
     def __init__(self, options: Optional[WechatyPluginOptions] = None):
         super().__init__(options)
-        
         self.event = Event()
-        self.is_init = False
-        self.logger = get_logger('messages', file='.wechaty/messages.log')
-
     async def init_plugin(self, wechaty: Wechaty) -> None:
+        """init the plugin on the dong event"""
         wechaty.on('dong', self.on_dong)
 
     async def on_dong(self, *args, **kwargs) -> None:
