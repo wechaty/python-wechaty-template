@@ -1,6 +1,6 @@
 FROM python:3.9
 
-WORKDIR /antigenbot
+WORKDIR /
 
 COPY requirements.txt requirements.txt
 
