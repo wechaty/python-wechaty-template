@@ -31,7 +31,7 @@ docker run -ti \
   -e WECHATY_PUPPET_SERVER_PORT \
   -e WECHATY_TOKEN \
   -p "$WECHATY_PUPPET_SERVER_PORT:$WECHATY_PUPPET_SERVER_PORT" \
-  wechaty/wechaty:0.56
+  wechaty/wechaty:0.65
 ```
 
 以上脚本当中，只需要调整三个地方：
