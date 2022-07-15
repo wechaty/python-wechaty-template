@@ -7,8 +7,8 @@ build:
 	# this command will run bot with root user
 	docker run -it -d -v "$(pwd)":/bot py-wechaty-template-bot:latest --name bot -p 8080:8080
 
-.PHONY: all
-all:
+.PHONY: bot 
+bot:
 	make build
 	make dockerrun
 
