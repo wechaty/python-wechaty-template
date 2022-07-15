@@ -3,3 +3,4 @@ wechaty-plugin-contrib
 quart
 python-dotenv
 docker
+apscheduler
