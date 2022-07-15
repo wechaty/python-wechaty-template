@@ -60,7 +60,6 @@ python bot.py
 
 ## History
 
-
 ### v0.0.1 (July 2022)
 
 The `python-wechaty-template` project was created. 

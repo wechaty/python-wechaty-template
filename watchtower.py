@@ -70,5 +70,6 @@ class WatchTower:
 
 
 if __name__ == '__main__':
-    watch_tower = WatchTower(name_or_id='id-of-bot-container', interval_seconds=180)
+    # name_or_id: container id of your bot
+    watch_tower = WatchTower(name_or_id='bot', interval_seconds=180)
     asyncio.run(watch_tower.watch())
