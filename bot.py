@@ -4,19 +4,20 @@ import asyncio
 from wechaty import Wechaty, WechatyOptions
 
 from dotenv import load_dotenv
-from src.plugins.health_checking import HealthCheckingPlugin
-from src.plugins.tts import TTSPlugin
+from src.plugins.plugin_manager import PluginManagerPlugin
+from src.plugins.ding_dong import DingDongPlugin
+from src.plugins.repeater import RepeaterPlugin
 
 
 if __name__ == "__main__":
     load_dotenv()
     options = WechatyOptions(
-        # port of web service
         port=8004,
     )
     bot = Wechaty(options)
     bot.use([
-        # HealthCheckingPlugin(),
-        TTSPlugin()
+        PluginManagerPlugin(),
+        DingDongPlugin(),
+        RepeaterPlugin()
     ])
     asyncio.run(bot.start())
