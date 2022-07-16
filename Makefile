@@ -1,3 +1,5 @@
+P=$(shell pwd)
+
 .PHONY: build
 build:	
 	docker build -t py-wechaty-template-bot:latest .
@@ -5,8 +7,7 @@ build:
 .PHONY: dockerrun
 dockerrun:
 	docker stop bot && docker rm bot
-	# this command will run bot with root user
-	docker run -it -d -v "$(pwd)":/bot --name bot -p 8080:8080 py-wechaty-template-bot:latest
+	docker run -it -d -v $(P):/bot --name bot -p 8004:8004 py-wechaty-template-bot:latest
 
 .PHONY: bot 
 bot:
