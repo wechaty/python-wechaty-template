@@ -4,3 +4,4 @@ quart
 python-dotenv
 docker
 apscheduler
+dataclasses-json

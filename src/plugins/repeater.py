@@ -1,35 +1,22 @@
-from wechaty import WechatyPlugin, Message
+from typing import Optional
+from wechaty import WechatyPlugin, Message, WechatyPluginOptions
 from quart import Quart
 from wechaty_plugin_contrib.message_controller import message_controller
+from src.utils import SettingFileMixin
+from src.ui_plugin import WechatyUIPlugin
 
 
-class RepeaterPlugin(WechatyPlugin):
+class RepeaterPlugin(WechatyUIPlugin):
 
     @message_controller.may_disable_message
     async def on_message(self, msg: Message) -> None:
-        if msg.room():
-            return None
+        talker, room = msg.talker(), msg.room()
+        setting = self.get_setting()
         
-        await msg.say(msg)
-     
-    def get_nav_info(self):
-        return {
-            "name": self.name,
-            "fetch_url": f'/api/plugins/{self.name.lower()}/view',
-            "icon": "https://wechaty.js.org/img/wechaty-icon.svg"
-        }
-    
-    def get_list_info(self):
-        return {
-            "name": self.name,
-            "author": "wj-Mcat",
-            "downloads_count": 1000,
-            "icon": "https://wechaty.js.org/img/wechaty-icon.svg",
-            "status": 0
-        }
-
-    async def blueprint(self, app: Quart) -> None:
-
-        @app.route(f'/api/plugins/{self.name.lower()}/view')
-        def get_repeater_view():
-            return 'view of repeater plugin with no UI'
+        conv_id = room.room_id if room else talker.contact_id
+        
+        if conv_id not in setting.get('admin_ids', []):
+            return
+        
+        await msg.forward(talker)
+        message_controller.disable_all_plugins()

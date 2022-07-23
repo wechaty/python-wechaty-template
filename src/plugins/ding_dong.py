@@ -1,9 +1,11 @@
 from wechaty import WechatyPlugin, Message
 from quart import Quart
 from wechaty_plugin_contrib.message_controller import message_controller
+from src.ui_plugin import WechatyUIPlugin
+from src.utils import SettingFileMixin
 
 
-class DingDongPlugin(WechatyPlugin):
+class DingDongPlugin(WechatyUIPlugin):
 
     @message_controller.may_disable_message
     async def on_message(self, msg: Message) -> None:
