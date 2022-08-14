@@ -91,6 +91,10 @@ class DingDongPlugin(WechatyPlugin):
 
 ## History
 
+### v0.0.2 (Aug 2022)
+
+add `wechaty-ui` based code.
+
 ### v0.0.1 (July 2022)
 
 The `python-wechaty-template` project was created. 
