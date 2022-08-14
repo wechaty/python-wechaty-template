@@ -8,6 +8,7 @@ class WechatyUIPlugin(WechatyPlugin, SettingFileMixin):
     AUTHOR_LINK = "https://github.com/wj-Mcat"
     ICON = "https://wechaty.js.org/img/wechaty-icon.svg"
     VIEW_URL = None
+    UI_DIR = "ui/dist"
 
     def metadata(self) -> NavMetadata:
         """get the default nav metadata

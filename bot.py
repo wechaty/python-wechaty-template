@@ -4,9 +4,11 @@ import asyncio
 from wechaty import Wechaty, WechatyOptions
 
 from dotenv import load_dotenv
-from src.plugins.plugin_manager import PluginManagerPlugin
+from wechaty_plugin_contrib.contrib.info_logger import InfoLoggerPlugin
 from src.plugins.ding_dong import DingDongPlugin
 from src.plugins.repeater import RepeaterPlugin
+from src.plugins.counter import CounterPlugin, UICounterPlugin
+from src.plugins.github_message_forwarder import GithubMessageForwarderPlugin
 
 
 if __name__ == "__main__":
@@ -16,8 +18,11 @@ if __name__ == "__main__":
     )
     bot = Wechaty(options)
     bot.use([
-        PluginManagerPlugin(),
         DingDongPlugin(),
-        RepeaterPlugin()
+        RepeaterPlugin(),
+        InfoLoggerPlugin(),
+        CounterPlugin(),
+        UICounterPlugin(),
+        GithubMessageForwarderPlugin()
     ])
     asyncio.run(bot.start())

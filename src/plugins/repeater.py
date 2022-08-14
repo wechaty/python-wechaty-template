@@ -19,4 +19,4 @@ class RepeaterPlugin(WechatyUIPlugin):
             return
         
         await msg.forward(talker)
-        message_controller.disable_all_plugins()
+        message_controller.disable_all_plugins(msg)
