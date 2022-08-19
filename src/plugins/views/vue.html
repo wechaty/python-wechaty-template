@@ -13,31 +13,31 @@
     <span>Count: {{count}}</span>
   </div>
 </body>
-  <script>
-    new Vue({
-      el: '#app',
-      data: function() {
-        return { 
-          count: 0
-        }
-      },
-      mounted() {
-        this.refresh()
-      },
-      methods: {
-        refresh() {
-          let $this = this;
-          axios.get("/api/plugins/ui_counter/count").then(function(e){
-            console.log(e)
-            $this.count = e.data.data
-            
-            $this.$notify({
-              type: "success",
-              message: "点击量+1"
-            })
-          })
-        }
+<script>
+  new Vue({
+    el: '#app',
+    data: function() {
+      return { 
+        count: 0
       }
-    })
-  </script>
+    },
+    mounted() {
+      this.refresh()
+    },
+    methods: {
+      refresh() {
+        let $this = this;
+        axios.get("/api/plugins/ui_counter/count").then(function(e){
+          console.log(e)
+          $this.count = e.data.data
+          
+          $this.$notify({
+            type: "success",
+            message: "点击量+1"
+          })
+        })
+      }
+    }
+  })
+</script>
 </html>

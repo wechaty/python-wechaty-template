@@ -5,11 +5,6 @@ class CounterPlugin(WechatyPlugin):
     # 需要和blueprint注册的UI入口地址一致
     VIEW_URL = '/api/plugins/counter/view'
 
-    def __init__(self):
-        # 此方法不能删除
-        super().__init__()
-        self.count = 0
-
     async def blueprint(self, app: Quart) -> None:
         
         @app.route('/api/plugins/counter/view')
@@ -18,19 +13,15 @@ class CounterPlugin(WechatyPlugin):
             with open("./src/plugins/views/table.jinja2", 'r', encoding='utf-8') as f:
             # with open("./src/plugins/views/vue.html", 'r', encoding='utf-8') as f:
                 template = f.read()
+            
+            self.setting['count'] += 1
 
-            self.count += 1
-            response = await render_template_string(template, count=self.count)
+            response = await render_template_string(template, count=self.setting['count'])
             return response
 
 class UICounterPlugin(WechatyPlugin):
     # 需要和blueprint注册的UI入口地址一致
     VIEW_URL = '/api/plugins/ui_counter/view'
-
-    def __init__(self):
-        # 此方法不能删除
-        super().__init__()
-        self.count = 0
 
     async def blueprint(self, app: Quart) -> None:
         
@@ -43,5 +34,5 @@ class UICounterPlugin(WechatyPlugin):
         
         @app.route('/api/plugins/ui_counter/count')
         async def get_ui_count():
-            self.count += 1
-            return jsonify({"data": self.count})
+            self.setting['count'] += 1
+            return jsonify({"data": self.setting['count']})
