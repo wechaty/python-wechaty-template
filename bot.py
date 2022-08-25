@@ -1,6 +1,7 @@
 """template of your bot"""
 from __future__ import annotations
 import asyncio
+import os
 from wechaty import Wechaty, WechatyOptions
 
 from dotenv import load_dotenv
@@ -14,7 +15,7 @@ from src.plugins.github_message_forwarder import GithubMessageForwarderPlugin
 if __name__ == "__main__":
     load_dotenv()
     options = WechatyOptions(
-        port=8004,
+        port=os.environ.get('port', 8004)
     )
     bot = Wechaty(options)
     bot.use([
@@ -23,6 +24,8 @@ if __name__ == "__main__":
         InfoLoggerPlugin(),
         CounterPlugin(),
         UICounterPlugin(),
-        GithubMessageForwarderPlugin()
+        GithubMessageForwarderPlugin(
+            endpoint=os.environ.get('github_endpoint', None) or "your-custom-endpoint"
+        ),
     ])
     asyncio.run(bot.start())

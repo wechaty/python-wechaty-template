@@ -1,6 +1,31 @@
 import json
 import os
 from quart import jsonify
+import socket
+
+
+def get_unused_localhost_port():
+    sock = socket.socket()
+    # This tells the OS to give us any free port in the range [1024 - 65535]
+    sock.bind(("", 0))
+    port = sock.getsockname()[1]
+    sock.close()
+    return port
+
+
+def remove_at_info(text: str) -> str:
+    """get the clear message, remove the command prefix and at"""
+    split_chars = ['\u2005', '\u0020']
+    while text.startswith('@'):
+        text = text.strip()
+        for char in split_chars:
+            tokens = text.split(char)
+            if len(tokens) > 1:
+                tokens = [token for token in text.split(char) if not token.startswith('@')]
+                text = char.join(tokens)
+            else:
+                text = ''.join(tokens)
+    return text
 
 
 class SettingFileMixin:

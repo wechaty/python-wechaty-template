@@ -6,8 +6,9 @@ import os
 from typing import Dict, List, Optional, Union
 import requests
 
-from wechaty import Contact, UrlLink, WechatyPlugin, WechatyPluginOptions, Wechaty
+from wechaty import Contact, UrlLink, WechatyPlugin, WechatyPluginOptions, Wechaty, Message
 from wechaty_puppet import UrlLinkPayload
+from wechaty_plugin_contrib.message_controller import message_controller
 from github import Github
 
 from github.PullRequest import PullRequest
@@ -34,30 +35,31 @@ class GithubAppMessageParser:
                                                      ]]:
         event, payload = message['event'], message['payload']
         trigger_name = f"{event}.{payload['action']}"
-        if trigger_name == "pull_request.opened":
-            return self.parse_issue_opened(payload)
-            
-        opened_obj = self.parse_opened(message)
-        if opened_obj:
-            return opened_obj
 
-        comment = self.parse_comment(message)
-        return comment
+        if trigger_name == "pull_request.opened":
+            return self.parse_pull_request_opened(payload)
+
+        if trigger_name == 'issues.opened':
+            return self.parse_issue_opened(payload)
+
+        if trigger_name == 'issue_comment.created':
+            return self.parse_issue_comment(payload)
+
     
     def parse_issue_comment(self, message: dict) -> UrlLinkPayload:
         full_name = message['repository']['full_name']
         issue_number = message['issue']['number']
         description = message['comment']['body']
         avatar_url = message['comment']['user']['avatar_url']
-        title=f"#{issue_number} {message['issue']['title'][:30]} {full_name}"
-         
+        title=f"Issue#{issue_number} {message['issue']['title'][:30]} {full_name}"
+        if "pull_request" in message['issue']:
+            title=f"PR#{issue_number} {message['issue']['title'][:30]} {full_name}"
+
         return GithubUrlLinkPayload(
             url=message['comment']['html_url'],
             title=title[:30],
             description=description[:70],
             thumbnailUrl=avatar_url,
-            full_name=full_name,
-            type='issue.comment'
         )
     
     def parse_issue_opened(self, message: dict) -> UrlLinkPayload:
@@ -73,15 +75,13 @@ class GithubAppMessageParser:
         issue_number = message['issue']['number']
         description = message['issue']['body']
         avatar_url = message['issue']['user']['avatar_url']
-        title=f"#{issue_number} {message['issue']['title'][:30]} {full_name}"
+        title=f"New Issue#{issue_number} {message['issue']['title'][:30]} {full_name}"
 
         return UrlLinkPayload(
             url=message['issue']['html_url'],
             title=title[:30],
             description=description[:70],
             thumbnailUrl=avatar_url,
-            full_name=full_name,
-            type='issue.opened'
         )
     
     def parse_pull_request_opened(self, message: dict) -> UrlLinkPayload:
@@ -97,15 +97,13 @@ class GithubAppMessageParser:
         pull_request_number = message['pull_request']['number']
         pull_request_body = message['pull_request']['body']
         avatar_url = message['pull_request']['user']['avatar_url']
-        title=f"#{pull_request_number} {message['pull_request']['title'][:30]} {full_name}"
+        title=f"New PR#{pull_request_number} {message['pull_request']['title'][:30]} {full_name}"
 
         return UrlLinkPayload(
             url=message['pull_request']['html_url'],
             title=title[:30],
             description=pull_request_body[:70],
             thumbnailUrl=avatar_url,
-            full_name=full_name,
-            type='pull_request.opened'
         )
 
     def parse_pull_request_review_submit_opened(self, message: dict) -> UrlLinkPayload:
@@ -128,9 +126,6 @@ class GithubAppMessageParser:
             title=title[:30],
             description=pull_request_body[:70],
             thumbnailUrl=avatar_url,
-            full_name=full_name,
-            # TOOD(wj-Mcat): 
-            type='pull_request.created'
         )
 
     def parse_pull_request_review_comment_opened(self, message: dict) -> UrlLinkPayload:
@@ -153,27 +148,41 @@ class GithubAppMessageParser:
             title=title[:30],
             description=pull_request_body[:70],
             thumbnailUrl=avatar_url,
-            full_name=full_name,
-            type='pull_request.comment'
         )
 
 
 class GithubMessageForwarderPlugin(WechatyPlugin):
     def __init__(self, endpoint: Optional[str] = None, token: Optional[str] = None):
         super().__init__()
-        self.endpoint = endpoint or "http://wj-github.localtunnel.chatie.io/messages/wechaty"
+        self.endpoint = endpoint
 
         token = token or os.environ.get("github_token", None)
         self.url_link_parser = GithubAppMessageParser(token)
 
     async def fetch_url_link(self):
-        self.logger.info("start to fetch github url_link ...")
         response = requests.get(self.endpoint)
-        for message in response.json().get("data", []):
+        messages = response.json().get('data', [])
+
+        self.logger.info(f"start to fetch github url_link status<{response.status_code}> messages<{len(messages)}> ...")
+
+        for message in messages:
             url_link = self.url_link_parser.parse(message)
-            contact: Contact = self.bot.Contact.load('wxid_gwemn8cbz51621')
-            await contact.say(UrlLink(url_link))
+            if not url_link:
+                continue
+
+            for contact_id in self.setting.get("admins", []):
+                contact: Contact = self.bot.Contact.load(contact_id)
+                await contact.say(UrlLink(url_link))
+
+            return
 
     async def init_plugin(self, wechaty: Wechaty) -> None:
+        # await self.fetch_url_link()
         self.add_interval_job(minutes=1, handler=self.fetch_url_link, job_id=self.name)
 
+    # @message_controller.may_disable_message
+    # async def on_message(self, msg: Message) -> None:
+    #     if msg.text() == "testing":
+    #         await self.fetch_url_link()
+    #         message_controller.disable_all_plugins(msg)
+    
