@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <script src="https://cdn.staticfile.org/vue/2.4.2/vue.min.js"></script>
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+</head>
+
+<body>
+    <div id="app">
+        <el-container>
+            <el-header>批量发送消息</el-header>
+            <el-main>
+                <el-form class="demo-form-inline">
+                    <el-form-item label="群聊">
+                        <el-select v-model="room_ids" multiple filterable placeholder="请选择" style='width: 100%' >
+                            <el-option v-for="room in rooms" :key="room.value" :label="room.label" :value="room.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="输入文本">
+                        <el-input type="textarea" v-model="text" placeholder="请输入文本，例如： 青山绿水"></el-input>
+                    </el-form-item>
+                    <el-form-item>
+                        <el-button type="primary" @click="onSubmit">查询</el-button>
+                    </el-form-item>
+                </el-form>
+            </el-main>
+        </el-container>
+    </div>
+</body>
+<script>
+    new Vue({
+        el: '#app',
+        data: function () {
+            return {
+                rooms: [],
+                text: "",
+                room_ids: []
+            }
+        },
+        mounted(){
+            let $this = this;
+            axios.get('/api/plugins/send_message/room_select').then(function(e){
+                console.log(e)
+                $this.rooms = e.data.data
+            })
+        },
+        methods: {
+            onSubmit() {
+                let $this = this;
+                axios.post("/api/plugins/send_message/room", json = {"room_ids": this.room_ids, "text": this.text}).then(function (e) {
+                    console.log(e)
+                    return
+
+                    if (e.data.code === 200) {
+                        $this.$notify({
+                            title: "消息",
+                            type: "success",
+                            message: "已成功发送"
+                        })
+                    }
+                })
+            }
+        }
+    })
+</script>
+
+</html>

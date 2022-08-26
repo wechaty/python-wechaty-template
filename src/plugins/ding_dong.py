@@ -9,9 +9,8 @@ class DingDongPlugin(WechatyPlugin):
     @message_controller.may_disable_message
     async def on_message(self, msg: Message) -> None:
         if msg.text() == "ding":
-            setting = self.setting
-
-            await msg.say(setting.get('ding', 'dong'))
+            await msg.say("dong")
+            await msg.say("I'm alive ...")
             message_controller.disable_all_plugins(msg)
 
     async def blueprint(self, app: Quart) -> None:
