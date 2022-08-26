@@ -59,6 +59,40 @@ class Conv2ConvsPlugin(WechatyPlugin):
         self.admin_status: Dict[str, List[Conversation]] = defaultdict(list)
         self.trigger_with_at = trigger_with_at
         self.with_alias = with_alias
+        
+        self.talker_desc_cache = {}
+    
+    async def get_talker_desc(self, msg: Message):
+        talker = msg.talker()
+        room = msg.room()
+
+        union_id = talker.contact_id
+        if room:
+            union_id += room.room_id
+        
+        if union_id in self.talker_desc_cache:
+            return self.talker_desc_cache[union_id]
+        
+        await talker.ready()
+        talker_name = talker.name
+        
+        if room:
+            alias = await room.alias(talker)
+            if alias:
+                talker_name = alias
+
+            room_name = None
+            if room.room_id in self.setting:
+                room_name = self.setting[room.room_id]['alias']
+
+            if not room_name:
+                await room.ready()
+                room_name = await room.topic()
+            
+            talker_name = f"{talker_name} @ {room_name}"
+    
+        self.talker_desc_cache[union_id] = talker_name
+        return talker_name
 
     async def forward_message(self, msg: Message, conversation_id: str):
         """forward the message to the target conversations
@@ -67,6 +101,8 @@ class Conv2ConvsPlugin(WechatyPlugin):
             msg (Message): the message to forward
             conversation_id (str): the id of conversation
         """
+        talker_desc = await self.get_talker_desc(msg)
+
         # 1. get the type of message
         conversations = self.admin_status.get(conversation_id, [])
         if not conversations:
@@ -83,9 +119,9 @@ class Conv2ConvsPlugin(WechatyPlugin):
 
         for conversation in conversations:
             if conversation.type == 'Room':
-                forwarder_target = await self.bot.Room.load(conversation.id)
+                forwarder_target = self.bot.Room.load(conversation.id)
             elif conversation.type == 'Contact':
-                forwarder_target = await self.bot.Contact.load(conversation.id)
+                forwarder_target = self.bot.Contact.load(conversation.id)
             else:
                 continue
             
@@ -97,7 +133,7 @@ class Conv2ConvsPlugin(WechatyPlugin):
             elif msg.type() == MessageType.MESSAGE_TYPE_TEXT:
                 text = msg.text()
                 if self.with_alias and conversation.alias:
-                    text = conversation.alias + '\n===============\n' + text
+                    text = talker_desc + '\n===============\n' + text
                 await forwarder_target.say(text)
 
             elif forwarder_target:
@@ -124,7 +160,7 @@ class Conv2ConvsPlugin(WechatyPlugin):
 
         # filter the target conversations
         receivers: List[Conversation] = []
-        for key, value in self.setting:
+        for key, value in self.setting.items():
             value['id'] = key
             if key == conversation_id:
                 continue
