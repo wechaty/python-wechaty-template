@@ -125,6 +125,7 @@ class Conv2ConvsPlugin(WechatyPlugin):
         # filter the target conversations
         receivers: List[Conversation] = []
         for key, value in self.setting:
+            value['id'] = key
             if key == conversation_id:
                 continue
             receivers.append(Conversation(
