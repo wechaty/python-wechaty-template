@@ -9,40 +9,11 @@ Python Wechaty Project Template which contains the best practise.
 如要运行微信机器人，需要申请Token来启动服务，在此推荐申请[Padlocal Token](http://pad-local.com/#/)来快速启动该服务。
 
 ### 启动Gateway Docker 服务
+运行本项目下的`start_gateway_docker.sh`脚本，并将申请到的Padlocal Token作为脚本参数传入
 
 ```shell
-# 设置环境变量
-
-export WECHATY_LOG="verbose"
-export WECHATY_PUPPET="wechaty-puppet-padlocal"
-export WECHATY_PUPPET_PADLOCAL_TOKEN="{{puppet_padlocal_XXXXXX}}"
-
-# export WECHATY_PUPPET_SERVER_PORT="{{open-service-port}}"
-export WECHATY_PUPPET_SERVER_PORT="8080"
-# 可使用代码随机生成UUID：import uuid;print(uuid.uuid4());
-export WECHATY_TOKEN="{{your-custom-id}}"
-
-docker run -ti \
-  --name wechaty_puppet_service_token_gateway \
-  --rm \
-  -e WECHATY_LOG \
-  -e WECHATY_PUPPET \
-  -e WECHATY_PUPPET_PADLOCAL_TOKEN \
-  -e WECHATY_PUPPET_SERVER_PORT \
-  -e WECHATY_TOKEN \
-  -p "$WECHATY_PUPPET_SERVER_PORT:$WECHATY_PUPPET_SERVER_PORT" \
-  wechaty/wechaty:0.65
+./start_gateway_docker.sh <your_token>
 ```
-
-以上脚本当中，只需要调整三个地方：
-
-* WECHATY_PUPPET_PADLOCAL_TOKEN: 申请的Padlocal Token
-* WECHATY_PUPPET_SERVER_PORT: 服务器暴露的端口，要确保该端口外部可访问性
-* WECHATY_TOKEN: 自定义的WechatyToken，建议使用生成的uuid
-
-### 设置环境变量
-
-将以上生成的`your-custom-id`添加到`.env`文件中。
 
 ### 运行机器人
 
@@ -51,6 +22,8 @@ make bot
 ```
 
 初次登陆时，可能需要多次扫码才会登陆成功。
+扫码登陆成功后，wechaty机器人就算启动成功了，可以通过微信向机器人发送消息`ding`来测试。默认开启DingDong插件，机器人会自动回复`dong`。
+至此，恭喜你，你的第一个微信机器人成功运行了！接下来可以将各种需求和业务逻辑以插件的形式加入到机器人中。
 
 ## 编写插件
 
